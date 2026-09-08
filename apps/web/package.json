@@ -1,0 +1,45 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "NODE_OPTIONS='--no-network-family-autoselection' next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "eslint",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.11.3",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "jose": "^5.10.0",
+    "lightningcss": "^1.32.0",
+    "lucide-react": "^0.544.0",
+    "next": "16.3.4",
+    "next-auth": "^4.24.11",
+    "pdf-parse": "^1.1.1",
+    "pg": "^8.16.3",
+    "pure-rand": "^8.4.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "recharts": "^2.15.0",
+    "resend": "^6.0.2",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^20",
+    "@types/pg": "^8.15.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.4",
+    "prisma": "^7.10.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.3.3"
+  }
+}

@@ -1,0 +1,211 @@
+// schema.prisma — AI-Enabled Skill Intelligence & Learning Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  OFFICIAL
+  ADMIN
+  TRAINER
+}
+
+enum AuthProvider {
+  EMAIL_OTP
+  GOOGLE
+}
+
+enum CompetencyDomain {
+  STATISTICAL
+  TECHNICAL
+  DIGITAL_GOVERNANCE
+  BEHAVIOURAL
+}
+
+enum CourseSource {
+  IGOT_KARMAYOGI
+  NSSTA_TPAC
+}
+
+enum EnrollmentStatus {
+  ENROLLED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum RecommendationSource {
+  INITIAL_ENGINE
+  REMEDIATION_ENGINE
+}
+
+enum ChunkSourceType {
+  COURSE_MATERIAL
+  COMPETENCY_FRAMEWORK
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model User {
+  id               String       @id @default(cuid())
+  email            String       @unique
+  name             String?
+  role             Role         @default(OFFICIAL)
+  authProvider     AuthProvider @default(EMAIL_OTP)
+  profileCompleted Boolean      @default(false)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  profile          Profile?
+  enrollments      Enrollment[]
+  competencyScores CompetencyScore[]
+  quizAttempts     QuizAttempt[]
+  recommendations  Recommendation[]
+  otpCodes         OtpCode[]
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  email     String
+  code      String
+  expiresAt DateTime
+  consumed  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Profile {
+  id                String   @id @default(cuid())
+  user              User     @relation(fields: [userId], references: [id])
+  userId            String   @unique
+  designation       String
+  department        String
+  jobRole           String
+  currentAssignment String
+  education         String?
+  workExperience    String?
+  priorTrainings    String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+/// Static requirement matrix, decoupled from any individual user.
+/// Seeded from seed/competency-matrix.json
+model RequiredCompetency {
+  id            String           @id @default(cuid())
+  jobRole       String
+  domain        CompetencyDomain
+  skillName     String
+  requiredLevel Float // 0-100
+
+  @@unique([jobRole, domain, skillName])
+}
+
+/// Per-user, per-skill assessed result.
+/// currentLevel inferred by AI Engine 1; gap computed against RequiredCompetency.
+model CompetencyScore {
+  id            String           @id @default(cuid())
+  user          User             @relation(fields: [userId], references: [id])
+  userId        String
+  domain        CompetencyDomain
+  skillName     String
+  currentLevel  Float // 0-100, inferred by AI Engine 1
+  requiredLevel Float // 0-100, copied from RequiredCompetency at assessment time
+  gap           Float // requiredLevel - currentLevel
+  assessedAt    DateTime         @default(now())
+}
+
+model Course {
+  id          String           @id @default(cuid())
+  externalId  String?          @unique
+  source      CourseSource
+  title       String
+  description String
+  domain      CompetencyDomain
+  skillTags   String[]
+  durationHrs Float?
+  createdAt   DateTime         @default(now())
+
+  /// pgvector column — written/queried via raw SQL only
+  embedding Unsupported("vector(768)")?
+
+  enrollments     Enrollment[]
+  recommendations Recommendation[]
+  assessments     Assessment[]
+}
+
+model DocumentChunk {
+  id         String                      @id @default(cuid())
+  sourceType ChunkSourceType
+  sourceId   String
+  chunkIndex Int
+  content    String
+  embedding  Unsupported("vector(768)")?
+  createdAt  DateTime                    @default(now())
+
+  @@index([sourceType, sourceId])
+}
+
+model Recommendation {
+  id          String               @id @default(cuid())
+  user        User                 @relation(fields: [userId], references: [id])
+  userId      String
+  course      Course               @relation(fields: [courseId], references: [id])
+  courseId    String
+  score       Float
+  reason      String?
+  generatedBy RecommendationSource
+  createdAt   DateTime             @default(now())
+}
+
+model Enrollment {
+  id          String           @id @default(cuid())
+  user        User             @relation(fields: [userId], references: [id])
+  userId      String
+  course      Course           @relation(fields: [courseId], references: [id])
+  courseId    String
+  status      EnrollmentStatus @default(ENROLLED)
+  enrolledAt  DateTime         @default(now())
+  completedAt DateTime?
+}
+
+model Assessment {
+  id                String   @id @default(cuid())
+  course            Course   @relation(fields: [courseId], references: [id])
+  courseId          String
+  title             String
+  sourceMaterialUrl String? // local disk path of uploaded .txt/.pdf
+  createdBy         String // trainer/admin userId, or "AI_ENGINE_2"
+  createdAt         DateTime @default(now())
+
+  questions    Question[]
+  quizAttempts QuizAttempt[]
+}
+
+model Question {
+  id                 String     @id @default(cuid())
+  assessment         Assessment @relation(fields: [assessmentId], references: [id])
+  assessmentId       String
+  questionText       String
+  options            String[]
+  correctOptionIndex Int
+  explanation        String?
+}
+
+model QuizAttempt {
+  id            String     @id @default(cuid())
+  user          User       @relation(fields: [userId], references: [id])
+  userId        String
+  assessment    Assessment @relation(fields: [assessmentId], references: [id])
+  assessmentId  String
+  score         Float
+  weakTopics    String[] // topics identified as weak; feeds AI Engine 3
+  attemptNumber Int        @default(1)
+  attemptedAt   DateTime   @default(now())
+}

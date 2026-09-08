@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #0068b4;
+  --color-brand-dark: #0b3d6e;
+  --color-brand-deep: #082a4a;
+  --color-brand-50: #e8f3fb;
+  --color-brand-100: #c5d9eb;
+  --color-brand-200: #8eb8d9;
+  --color-brand-300: #5a9ac8;
+  --color-accent: #f99d1c;
+  --color-accent-hover: #ef7e23;
+  --color-ink: #374957;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #374957;
+  --igot-navy: #0b3d6e;
+  --igot-blue: #0068b4;
+  --igot-orange: #f99d1c;
+  --igot-orange-deep: #ef7e23;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* iGOT-style hexagonal pattern for auth side panels */
+.auth-hex-bg {
+  background-color: var(--igot-navy);
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(249, 157, 28, 0.12) 0%, transparent 35%),
+    radial-gradient(circle at 80% 70%, rgba(0, 104, 180, 0.35) 0%, transparent 40%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath fill='none' stroke='%231a5480' stroke-width='1' d='M28 0l28 16v32L28 64 0 48V16zM28 64l28 16v32L28 128 0 112V80z'/%3E%3C/svg%3E");
+  background-size: auto, auto, 56px 100px;
+}
+
+.auth-fade-in {
+  animation: authFadeIn 0.45s ease-out both;
+}
+
+.auth-fade-in-delay {
+  animation: authFadeIn 0.55s ease-out 0.12s both;
+}
+
+@keyframes authFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landing-fade-up {
+  animation: landingFadeUp 0.55s ease-out both;
+}
+
+.landing-fade-up-delay {
+  animation: landingFadeUp 0.6s ease-out 0.1s both;
+}
+
+.landing-fade-up-delay-2 {
+  animation: landingFadeUp 0.65s ease-out 0.18s both;
+}
+
+@keyframes landingFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hub-tile:hover .hub-icon {
+  background: var(--color-brand);
+  color: white;
+}

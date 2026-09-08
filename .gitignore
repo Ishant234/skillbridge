@@ -1,0 +1,38 @@
+# Node
+node_modules/
+.next/
+out/
+dist/
+.turbo/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+
+# Uploads
+uploads/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Extra safety: env files anywhere
+**/.env
+**/.env.local
